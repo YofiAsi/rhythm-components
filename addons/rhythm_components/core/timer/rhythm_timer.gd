@@ -3,8 +3,6 @@ extends RhythmComponent
 
 signal timeout
 
-@export var conductor: RhythmConductor
-
 @export var wait_beats: float = 1.0
 @export var one_shot: bool = false
 @export var autostart: bool = false
@@ -14,9 +12,7 @@ var time_left: float = -100.0
 var _start_beat: float = 0.0
 
 func _ready() -> void:
-	if not is_instance_valid(conductor):
-		push_warning("No conductor provided")
-		return
+	super._ready()
 	if autostart:
 		start(wait_beats)
 	else:
@@ -31,7 +27,7 @@ func is_stopped() -> bool:
 
 func start(beats: float = wait_beats) -> void:
 	wait_beats = beats
-	var cb := conductor.current_beat
+	var cb := orchestrator.beat
 	var rb := roundf(cb)
 	_start_beat = rb
 	time_left = wait_beats - (cb - rb)
@@ -51,7 +47,7 @@ func get_time_left() -> float:
 func _process(delta: float) -> void:
 	if is_stopped():
 		return
-	var cb := conductor.current_beat
+	var cb := orchestrator.beat
 	time_left = (_start_beat + wait_beats) - cb
 	if time_left <= 0.0:
 		timeout.emit()

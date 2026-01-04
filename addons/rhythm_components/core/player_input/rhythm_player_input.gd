@@ -6,12 +6,11 @@ signal player_input_event(
 	event: InputEvent
 )
 
-@export var actions: Array[StringName] = []
-
+var actions: Array[StringName] = []
 var enabled: bool = true
 
 func _ready() -> void:
-	pass
+	super._ready()
 
 func set_enabled(v: bool) -> void:
 	enabled = v
@@ -30,3 +29,6 @@ func _input(event: InputEvent) -> void:
 
 func _handle_action_event(action: StringName, event: InputEvent) -> void:
 	player_input_event.emit(action, event)
+
+func set_actions(_actions: Array[StringName]) -> void:
+	actions = _actions

@@ -6,10 +6,13 @@ signal measure_update(measure: int)
 var bpm : float = 120.0
 var beats_per_measure : float = 4
 var beat_unit : float = 4
-var beat_duration : float = 0.0
 
+var beat_duration : float = 0.0
 var current_beat : float = 0.0
 var current_measure: int = 0
+
+func _ready() -> void:
+	super._ready()
 
 func set_song(
 	song_bpm: float,
@@ -23,8 +26,8 @@ func set_song(
 	self.current_beat = 0.0
 	self.current_measure = 0
 
-func update(args: Dictionary = {}) -> void:
-	var t = args.get("song_time", -1)
+func update(song_pos: float = -1) -> void:
+	var t := song_pos
 	if t <= -1:
 		push_error("song time not provided")
 		return
