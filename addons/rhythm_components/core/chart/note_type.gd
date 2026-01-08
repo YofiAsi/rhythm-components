@@ -3,9 +3,8 @@ extends Resource
 
 @export var action_name: StringName
 
-@export var hold: bool = false
-@export var hold_time: float # (Beats)
-@export var on_hold: Callable
+@export var release_on_beat: bool = false
+var on_hold: Callable
 
 # Time (in beats) before the actual hit time to enter
 @export var behavior_pre_offset: float

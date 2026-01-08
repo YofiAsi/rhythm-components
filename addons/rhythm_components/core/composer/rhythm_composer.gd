@@ -163,7 +163,11 @@ func add_note(note: ChartPartNote) -> void:
 	var pre_t  = note.start_time - note.type.behavior_pre_offset
 	var hw_open = note.start_time - _hit_window
 	var hw_close = note.start_time + _hit_window
-	var post_t = note.start_time + note.type.behavior_post_offset
+	var post_t: float
+	if note.hold:
+		post_t = note.start_time + note.hold_time
+	else:
+		post_t = note.start_time + note.type.behavior_post_offset
 
 	if pre_t <= _prev_beat:
 		push_warning("Cannot insert note: first action occurs in the past.")
@@ -182,28 +186,28 @@ func _quantize_to_measure_parts(time: float, parts: Array[float]) -> float:
 	if parts.is_empty():
 		return ceil(time)
 
-	var beats_per_measure := orchestrator.beats_per_measure
-	var current_measure := orchestrator.measure
+	var beats_per_measure: float = orchestrator.beats_per_measure
+	var current_measure: int = orchestrator.measure
 
 	parts.sort()
 
 	# Try current measure
 	for part in parts:
-		var candidate := current_measure * beats_per_measure \
+		var candidate: float = current_measure * beats_per_measure \
 			+ part * beats_per_measure
 
 		if candidate >= time:
 			return candidate
 
 	# Fallback: next measure
-	var next_measure := current_measure + 1
+	var next_measure: int = current_measure + 1
 	return next_measure * beats_per_measure \
 		+ parts[0] * beats_per_measure
 
 func add_note_auto(note: ChartPartNote) -> float:
 	# Compute the earliest possible hit time such that
 	# all derived action times are still in the future.
-	var needed_enter_time := orchestrator.beat + EPSILON
+	var needed_enter_time: float = orchestrator.beat + EPSILON
 	
 	var enter_time := _quantize_to_measure_parts(
 		needed_enter_time,
@@ -225,7 +229,7 @@ func _resolve_sequence_enter_time(sequence: ChartPartSequence) -> float:
 	if sequence.start_time > 0.0:
 		return sequence.start_time
 
-	var needed_enter_time := orchestrator.beat + EPSILON
+	var needed_enter_time: float = orchestrator.beat + EPSILON
 
 	return _quantize_to_measure_parts(
 		needed_enter_time,
@@ -236,7 +240,11 @@ func _compute_sequence_end_time(sequence: ChartPartSequence) -> float:
 	var max_time := 0.0
 
 	for part in sequence.parts:
-		var part_end : float = part.start_time + part.type.behavior_post_offset
+		var part_end: float
+		if part is ChartPartNote and part.hold:
+			part_end = part.start_time + part.hold_time
+		else:
+			part_end = part.start_time + part.type.behavior_post_offset
 		if part_end > max_time:
 			max_time = part_end
 
